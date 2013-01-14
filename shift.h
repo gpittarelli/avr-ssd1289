@@ -1,0 +1,15 @@
+/* Optimized shift-out function for shift registers, in this case two
+ * 74HC595's.
+ */
+
+#ifndef __SHIFT_h
+#define __SHIFT_h
+
+#include <inttypes.h>
+#include <avr/io.h>
+
+#include "pins.h"
+
+void inline shift_out(uint16_t data);
+
+#endif
