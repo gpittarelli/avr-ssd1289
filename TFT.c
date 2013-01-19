@@ -64,13 +64,22 @@ void TFT_draw_box(uint16_t x1, uint16_t y1, uint16_t x2,
     j = dx;
     while (--j) {
       PORTB &= ~(_BV(TFT_WR));
-      _delay_ms(1);
       PORTB |= _BV(TFT_WR);
-      _delay_ms(1);
     }
   }
 
   PORTB |= _BV(TFT_CS);
+}
+
+void TFT_box_outline(uint16_t x1, uint16_t y1, uint16_t x2,
+                     uint16_t y2, uint16_t width, uint16_t color) {
+  width-=1;
+  TFT_draw_box(x1, y1, x2, y1 + width, color);
+
+  TFT_draw_box(x1, y1+width, x1+width, y2-width, color);
+  TFT_draw_box(x2-width, y1+width, x2, y2-width, color);
+
+  TFT_draw_box(x1, y2 - width, x2, y2, color);
 }
 
 void TFT_dot(uint16_t x, uint16_t y, uint16_t color) {
