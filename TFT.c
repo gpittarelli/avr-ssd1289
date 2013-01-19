@@ -54,17 +54,19 @@ void TFT_fill(uint16_t color) {
 
 void TFT_draw_box(uint16_t x1, uint16_t y1, uint16_t x2,
                   uint16_t y2, uint16_t color) {
-  uint16_t dx = x2 - x1 + 1, j;
+  uint16_t dx = x2 - x1 + 2, j;
   PORTB &= ~(_BV(TFT_CS));
   TFT_write_address(x1, y1, x2, y2);
   TFT_write_data(color);
 
-  y2 -= y1 + 1;
+  y2 = (y2 - y1) + 2;
   while (--y2) {
     j = dx;
     while (--j) {
       PORTB &= ~(_BV(TFT_WR));
+      _delay_ms(1);
       PORTB |= _BV(TFT_WR);
+      _delay_ms(1);
     }
   }
 
