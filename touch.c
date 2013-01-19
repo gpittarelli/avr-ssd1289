@@ -46,9 +46,10 @@ uint16_t touch_read_data(void) {
 }
 
 void touch_read(uint16_t * out_x, uint16_t * out_y) {
-  uint16_t temp_x, temp_y;
-  uint32_t tx = 0, ty = 0;
-	uint_fast8_t datacount = 0;
+  int temp_x, temp_y;
+  int32_t tx = 0, ty = 0;
+
+	int_fast8_t datacount = 0;
 
 	for (uint_fast8_t i = 8; i; --i) {
 		touch_write_data(0x90);
@@ -65,7 +66,11 @@ void touch_read(uint16_t * out_x, uint16_t * out_y) {
     nop(); nop();
 		temp_y = touch_read_data();
 
-   	if (temp_x && temp_y) {
+   	if (temp_x && temp_y
+        //  && (temp_x > 0x01A0)
+        && (temp_x < 0x1F10)
+        //    && (temp_y > 0x02A3)
+        && (temp_y < 0x1EE6)) {
 			ty += temp_x;
 			tx += temp_y;
 			++datacount;
@@ -85,6 +90,18 @@ void touch_read(uint16_t * out_x, uint16_t * out_y) {
 
     ty *= 320;
     ty /= (0x1EE6 - 0x02A3);
+
+    if (tx < 0) {
+      tx = 0;
+    } else if (tx > 239) {
+      tx = 239;
+    }
+
+    if (ty < 0) {
+      ty = 0;
+    } else if (ty > 319) {
+      ty = 319;
+    }
 
     *out_x = tx;
     *out_y = 320-ty;
