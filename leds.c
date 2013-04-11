@@ -11,8 +11,8 @@
 #include "shift.h"
 #include "touch.h"
 
-FILE uart_output = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
-FILE uart_input = FDEV_SETUP_STREAM(NULL, uart_getchar, _FDEV_SETUP_READ);
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
 
 void TFT_pattern1(void) {
   uint16_t i;
@@ -44,11 +44,33 @@ void TFT_pattern2(void) {
   PORTB |= _BV(TFT_RS);
 }
 
+uint16_t read_temp(void) {
+  uint16_t temp = 1;
+
+
+
+  return temp;
+}
+
 int main(void) {
+/*
+  configure_as_output(SHIFT_DATA);
+  configure_as_output(SHIFT_LATCH);
+  configure_as_output(SHIFT_CLOCK);
+
+  configure_as_output(TOUCH_IN);
+  configure_as_output(TOUCH_CLK);
+
+  configure_as_output(TFT_RS);
+  configure_as_output(TFT_WR);
+  configure_as_output(TFT_CS);
+  configure_as_output(TFT_RD);
+  configure_as_output(TFT_RST); */
+
   DDRD = _BV(SHIFT_DATA) | _BV(SHIFT_LATCH) | _BV(SHIFT_CLOCK);
   DDRB = _BV(TFT_RS) | _BV(TFT_WR) | _BV(TFT_RD) | _BV(TFT_CS) | _BV(TFT_RST);
   DDRC = 0 | _BV(TOUCH_IN) | _BV(TOUCH_CLK);
-  //    TOUCH_OUT set to INPUT
+
 
   PORTD = 0;
   PORTC = 0;
@@ -56,136 +78,52 @@ int main(void) {
 
   TFT_init();
 
-  uart_init();
-  stdout = &uart_output;
-  stdin  = &uart_input;
-
   touch_init();
 
-  TFT_fill(0);
+  TFT_fill(0xFFFF);
 
-  uint16_t x = 0, y = 0;
-  uint8_t ch;
+  TFT_box_outline(2,2,92,24,2,0);
 
-  // draw all of 8x8 font
-  for (ch = ' '; ch <= '~'; ++ch) {
-    TFT_char(FONT_8x8, ch, x, y, 61, 62016, 8, 8);
-    x += 8;
-    if (x >= 240) {
-      y += 8;
-      x = 0;
-    }
-  }
+  TFT_char(FONT_16x16, 'C', 5, 5, 0, 0xFFFF, 16, 16);
+  TFT_char(FONT_16x16, 'l', 22, 5, 0, 0xFFFF, 16, 16);
+  TFT_char(FONT_16x16, 'e', 39, 5, 0, 0xFFFF, 16, 16);
+  TFT_char(FONT_16x16, 'a', 56, 5, 0, 0xFFFF, 16, 16);
+  TFT_char(FONT_16x16, 'r', 73, 5, 0, 0xFFFF, 16, 16);
 
-  // 8x8 font has 2 extra symbols:
-  TFT_char(FONT_8x8, ch + 1, x, y, 61, 62016, 8, 8);
-  TFT_char(FONT_8x8, ch + 2, x + 8, y, 61, 62016, 8, 8);
-
-  y += 8;
-
-  x = 0;
-  for (ch = ' '; ch <= '~'; ++ch) {
-    TFT_char(FONT_16x16, ch, x, y, 61, 62016, 16, 16);
-    x += 16;
-    if (x >= 240) {
-      y += 16;
-      x = 0;
-    }
-  }
-
-  char command[10];
-  uint16_t arg1, arg2, arg3, arg4;
-
-  x = 0;
-  y = 0;
-
-  uint_fast16_t n;
-  uint_fast32_t tx, ty;
-
-  while(1) { /*
-    n = 0;
-    tx = ty = 0;
-    while (touch_available()) {
-      touch_read(&x, &y);
-      tx += x;
-      ty += y;
-      ++n;
-      _delay_us(100);
-    }
-
-    if (tx && ty) {
-      tx /= n;
-      ty /= n;
-      printf("%#04lX   %#04lX\n", tx, ty);
-    } */
-/*
+  uint16_t x, y, box_x1=0xFFFF, box_x2, box_y1, box_y2,
+    prev_bx1, prev_bx2, prev_by1, prev_by2;
+  while(1) {
     if (touch_available()) {
-      fputs("Touch!", stdout);
-    } else {
-      fputs("      ", stdout);
-    }
+      touch_read(&x, &y);
 
-    if (PINC & _BV(TOUCH_BUSY)) {
-      fputs(" c ", stdout);
-    } else {
-      fputs("   ", stdout);
-    }
-*/
-    touch_read(&x, &y);
-//    printf("%#04X   %#04X\n", x, y);
-    if (x != 0xFFFF) {
-      TFT_draw_box(x-1, y-1, x+1, y+1, 61);
-    }
+      if (x != 0xFFFF && y != 0xFFFF) {
+        prev_bx1 = box_x1;
+        prev_bx2 = box_x2;
+        prev_by1 = box_y1;
+        prev_by2 = box_y2;
 
-  }
+        box_x1 = (x >= 1)? (x-1) : 0;
+        box_x2 = (x <= 238)? (x+1) : 239;
 
-  while (1) {
-    //input = getchar();
+        box_y1 = (y >= 1)? (y-1) : 0;
+        box_y2 = (y <= 318)? (y+1) : 319;
 
-    scanf("%9s %u %u %u %u", command, &arg1, &arg2, &arg3, &arg4);
+        TFT_draw_box(box_x1, box_y1, box_x2, box_y2, 61);
 
-    printf("Got: %s %u %u %u %u\n", command, arg1, arg2, arg3, arg4);
+        if (x > 2 && x < 92 && y > 2 && y < 24) {
+          TFT_fill(0xFFFF);
 
-    if (strcmp(command, "rect") == 0) {
-      printf("Drawing rect from (%u, %u) -> (%u, %u)\n",
-             arg1, arg2, arg3, arg4);
-      TFT_draw_box(arg1, arg2, arg3, arg4, 61);
-      puts("Done");
+          TFT_box_outline(2,2,92,24,2,0);
+
+          TFT_char(FONT_16x16, 'C', 5, 5, 0, 0xFFFF, 16, 16);
+          TFT_char(FONT_16x16, 'l', 22, 5, 0, 0xFFFF, 16, 16);
+          TFT_char(FONT_16x16, 'e', 39, 5, 0, 0xFFFF, 16, 16);
+          TFT_char(FONT_16x16, 'a', 56, 5, 0, 0xFFFF, 16, 16);
+          TFT_char(FONT_16x16, 'r', 73, 5, 0, 0xFFFF, 16, 16);
+        }
+      }
     }
   }
-/*
-    if (input >= ' ' && input <= '~') {
-      TFT_char(FONT_16x16, input, x, y, 61, 62016, 16, 16);
-      x += 16;
-      if (x >= 240) {
-        y += 16;
-        x = 0;
-      }
-    } else if (input == '\r') {
-      TFT_draw_box(x, y, 239, y+16, 62016);
-
-      y += 16;
-      x = 0;
-    } else if (input == 0x7F) { // Backspace
-      if (x == 0 && y == 0) {
-        continue;
-      }
-
-      if (x > 0) {
-        x -= 16;
-      } else {
-        y -= 16;
-        x = 240-16;
-      }
-      TFT_char(FONT_16x16, ' ', x, y, 61, 62016, 16, 16);
-    } else {
-      printf("Invalid: %#X\n", input);
-    }
-
-    if (y >= 320) {
-      y = 0;
-    }
-    } */
 
   return 0;
 }

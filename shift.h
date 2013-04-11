@@ -10,6 +10,16 @@
 
 #include "pins.h"
 
-void inline shift_out(uint16_t data);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void shift_out(uint16_t data);
+void inline shift_out_inline(uint16_t data);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif

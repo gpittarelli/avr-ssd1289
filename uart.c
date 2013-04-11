@@ -8,6 +8,12 @@
 
 #include "uart.h"
 
+/*
+FILE uart_output = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
+FILE uart_input = FDEV_SETUP_STREAM(NULL, uart_getchar, _FDEV_SETUP_READ);
+*/
+
+
 /* http://www.cs.mun.ca/~rod/Winter2007/4723/notes/serial/serial.html */
 
 void uart_init(void) {
@@ -22,6 +28,9 @@ void uart_init(void) {
 
     UCSR0C = _BV(UCSZ01) | _BV(UCSZ00); /* 8-bit data */
     UCSR0B = _BV(RXEN0) | _BV(TXEN0);   /* Enable RX and TX */
+
+    FILE *uart_str = fdevopen(uart_putchar, uart_getchar);
+    stdout = stdin = uart_str;
 }
 
 int uart_putchar(char c, FILE *stream) {

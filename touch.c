@@ -7,7 +7,6 @@ void touch_init(void) {
 }
 
 void touch_write_data(uint_fast8_t data) {
-
   PORTC &= ~(_BV(TOUCH_CLK));
 
   for (uint8_t mask = 0x80; mask; mask >>= 1)
@@ -51,7 +50,7 @@ void touch_read(uint16_t * out_x, uint16_t * out_y) {
 
 	int_fast8_t datacount = 0;
 
-	for (uint_fast8_t i = 8; i; --i) {
+	for (uint_fast8_t i = 10; i; --i) {
 		touch_write_data(0x90);
     PORTC |= _BV(TOUCH_CLK);
     nop(); nop();

@@ -1,4 +1,5 @@
 #include "shift.h"
+#include <util/delay.h>
 /*
 void shift_out(uint16_t data) {
   uint16_t mask = 1 << 15, not_bit;
@@ -26,8 +27,8 @@ void shift_out(uint16_t data) {
   PORTD |= _BV(SHIFT_LATCH);
   PORTD &= ~(_BV(SHIFT_LATCH));
 }
-
-void inline shift_out(uint16_t data) {
+*/
+void shift_out(uint16_t data) {
   uint16_t mask = 1 << 15; //0x8000; // 1000 0000b
 
   while (mask) {
@@ -46,4 +47,3 @@ void inline shift_out(uint16_t data) {
   PORTD |= _BV(SHIFT_LATCH);
   PORTD &= ~(_BV(SHIFT_LATCH));
 }
-*/

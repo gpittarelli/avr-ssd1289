@@ -14,10 +14,12 @@ AVRDUDE_MCU = m328p
 TARGET = leds
 
 # Programming hardware: type avrdude -c ?
-# to get a full listing.
-AVRDUDE_PROGRAMMER = arduino
+# to get a full listing.  avrisp #arduino
+AVRDUDE_PROGRAMMER = usbtiny
 
 AVRDUDE_PORT = COM4
+
+AVRDUDE_BAUD = 230400
 
 ############# Don't need to change below here for most purposes  (Elliot)
 
@@ -45,8 +47,8 @@ SRC += uart.c TFT.c shift.c touch.c
 # output from the compiler), and will be deleted upon "make clean"!
 # Even though the DOS/Win* filesystem matches both .s and .S the same,
 # it will preserve the spelling of the filenames, and gcc itself does
-# care about how the name is spelled on its command-line.
-ASRC = shiftasm.S
+# care about how the name is spelled on its command-line. shiftasm.S
+ASRC = # shiftasm.S
 
 
 # List any extra directories to look for include files here.
@@ -63,10 +65,11 @@ EXTRAINCDIRS =
 #    -ahlms:  create assembler listing
 CFLAGS =  -O$(OPT) \
 -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums \
--Wall -Wstrict-prototypes \
+-Wall \
 -Wa,-adhlns=$(<:.c=.lst) \
 $(patsubst %,-I%,$(EXTRAINCDIRS))
 
+#-Wstrict-prototypes \
 
 # Set a "language standard" compiler flag.
 #   Unremark just one line below to set the language standard to use.
@@ -74,7 +77,7 @@ $(patsubst %,-I%,$(EXTRAINCDIRS))
 #CFLAGS += -std=c89
 #CFLAGS += -std=gnu89
 #CFLAGS += -std=c99
-CFLAGS += -std=gnu99
+#CFLAGS += -std=gnu99
 
 CFLAGS += -DF_CPU=16000000
 
@@ -127,7 +130,7 @@ AVRDUDE_FLAGS = -p $(AVRDUDE_MCU) -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER)
 AVRDUDE_FLAGS += -v
 
 # Programmer baud rate
-AVRDUDE_FLAGS += -b 57600
+# AVRDUDE_FLAGS += -b $(AVRDUDE_BAUD)
 
 #Run while cable attached or don't
 #AVRDUDE_FLAGS += -E reset #keep chip disabled while cable attached
@@ -152,7 +155,7 @@ DIRLIB = $(DIRAVR)/avr/lib
 # Define programs and commands.
 SHELL = sh
 
-CC = avr-gcc
+CC = avr-g++
 
 OBJCOPY = avr-objcopy
 OBJDUMP = avr-objdump

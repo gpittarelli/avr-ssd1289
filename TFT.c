@@ -51,7 +51,6 @@ void TFT_fill(uint16_t color) {
   PORTB |= _BV(TFT_CS);
 }
 
-
 void TFT_draw_box(uint16_t x1, uint16_t y1, uint16_t x2,
                   uint16_t y2, uint16_t color) {
   uint16_t dx = x2 - x1 + 2, j;
